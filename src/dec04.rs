@@ -25,6 +25,8 @@ struct Board {
 impl Board {
     fn parse(input: &str) -> Self {
         let line_len = input.lines().nth(1).unwrap().len();
+        // a join and a cast to Vec<char>
+        // but rust has no join yet... (is in nightly)
         let arr: Vec<char> = input
             .lines()
             .filter(|l| !l.is_empty())
@@ -39,7 +41,7 @@ impl Board {
     }
 
     fn check(&self, x: i32, y: i32, c: char) -> bool {
-        self.data[x as usize + y as usize * 10] == c
+        self.data[x as usize + y as usize * self.cols] == c
     }
 
     fn check_xmas(&self, x0: usize, y0: usize, xk: i32, yk: i32) -> bool {
@@ -54,6 +56,34 @@ impl Board {
             };
         }
         true
+    }
+
+    fn check_arm(&self, x0: i32, y0: i32, up: bool) -> bool {
+        if !self.check(x0, y0, 'A') {
+            return false;
+        };
+
+        if up {
+            let fwd = self.check(x0 - 1, y0 + 1, 'M') && self.check(x0 + 1, y0 - 1, 'S');
+            let bw = self.check(x0 - 1, y0 + 1, 'S') && self.check(x0 + 1, y0 - 1, 'M');
+            return fwd || bw;
+        }
+
+        // down arm
+        let fwd = self.check(x0 - 1, y0 - 1, 'M') && self.check(x0 + 1, y0 + 1, 'S');
+        let bw = self.check(x0 - 1, y0 - 1, 'S') && self.check(x0 + 1, y0 + 1, 'M');
+        return fwd || bw;
+    }
+
+    fn check_mas(&self, x0: usize, y0: usize) -> bool {
+        // we're checking a cross with an A in the middle
+        // M/S M/S
+        //    A
+        // M/S M/S
+        // if one end has the M, the other has to have S
+        // so, 4 arm combination
+        // i will call one arm up, and one arm down
+        self.check_arm(x0 as i32, y0 as i32, true) && self.check_arm(x0 as i32, y0 as i32, false)
     }
 }
 
@@ -82,8 +112,30 @@ fn task1(input: &str) -> usize {
     res
 }
 
+const SAMPLE2: &str = "
+.M.S......
+..A..MSMS.
+.M.S.MAA..
+..A.ASMSM.
+.M.S.M....
+..........
+S.S.S.S.S.
+.A.A.A.A..
+M.M.M.M.M.
+..........
+";
+
 fn task2(input: &str) -> usize {
-    2
+    let mut res = 0;
+    let board = Board::parse(input);
+    for x in 1..(board.cols - 1) {
+        for y in 1..(board.rows - 1) {
+            if board.check_mas(x, y) {
+                res += 1
+            };
+        }
+    }
+    res
 }
 
 #[test]
@@ -123,17 +175,17 @@ fn dec04_task1_sample() {
 #[test]
 fn dec04_task1() {
     let res = task1(include_str!("../input/dec04.txt"));
-    assert_eq!(res, 835);
+    assert_eq!(res, 2517);
 }
 
 #[test]
 fn dec04_task2_sample() {
     let res = task2(&SAMPLE);
-    assert_eq!(res, 0);
+    assert_eq!(res, 9);
 }
 
 #[test]
 fn dec04_task2() {
     let res = task2(include_str!("../input/dec04.txt"));
-    assert_eq!(res, 0);
+    assert_eq!(res, 1960);
 }

@@ -75,25 +75,25 @@ fn task2(input: &str) -> usize {
 }
 
 #[test]
-fn test_day03_task1_sample() {
+fn dec03_task1_sample() {
     let res = task1(&SAMPLE);
     assert_eq!(res, 161);
 }
 
 #[test]
-fn test_day03_task1() {
+fn dec03_task1() {
     let res = task1(include_str!("../input/dec03.txt"));
     assert_eq!(res, 178886550);
 }
 
 #[test]
-fn test_day03_task2_sample() {
+fn dec03_task2_sample() {
     let res = task2(&SAMPLE2);
     assert_eq!(res, 48);
 }
 
 #[test]
-fn test_day03_task2() {
+fn dec03_task2() {
     let res = task2(include_str!("../input/dec03.txt"));
     assert_eq!(res, 87163705);
 }
